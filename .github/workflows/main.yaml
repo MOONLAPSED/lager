@@ -29,6 +29,9 @@ jobs:
       - name: Navigate to directory with main.py and print current directory
         run: cd /home/runner/work/tp-ob/tp-ob; pwd; ls -la
 
+      - name: Create log file
+        run: touch /.github/workflows/python-app.log
+
       - name: python-main
         run: |
           python main.py 2>&1 | tee /.github/workflows/python-app.log
