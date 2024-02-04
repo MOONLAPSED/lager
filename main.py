@@ -6,7 +6,7 @@ def main():
     dotl = l._freeze()
     print(l)
     l.logger.warning('Hello, World!')
-    print(f'dataclass {dotl} has {len(l.logger.handlers)} handlers and {len(l.logger.manager.loggerDict)} loggers and type {type(l.logger)}')
+    print(f'dataclass {dotl} has been frozen with attributes: {fields(dotl)}')
     l.stop()
 
 if __name__ == '__main__':
