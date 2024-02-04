@@ -83,15 +83,7 @@ class TpLogger:
         self.logger = self.get_logger(f'{self.branch_name}.{self.leaf_name}')
 
 
-def __post_init__(self):
-    object.__setattr__(self, 'exception_type', type(self.exception).__name__)
-    object.__setattr__(self, 'exception_message', str(self.exception))
-    return make_dataclass('FrozenBroadcastReporter', [(field.name, field.type) for field in fields(self)], frozen=True)(*self.serialize())
-
-def main():
-    logger = TpLogger('INFO', 'log.txt', 'branch', 'leaf')
-    logger.logger.warning('Hello, World!')
-    logger.stop()
-
-if __name__ == '__main__':
-    main()
+    def __post_init__(self):
+        object.__setattr__(self, 'exception_type', type(self.exception).__name__)
+        object.__setattr__(self, 'exception_message', str(self.exception))
+        return make_dataclass('FrozenBroadcastReporter', [(field.name, field.type) for field in fields(self)], frozen=True)(*self.serialize())
