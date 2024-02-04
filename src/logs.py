@@ -82,8 +82,6 @@ class TpLogger:
         self.queue_listener.start()
         self.logger = self.get_logger(f'{self.branch_name}.{self.leaf_name}')
 
-
-    def __post_init__(self):
-        object.__setattr__(self, 'exception_type', type(self.exception).__name__)
-        object.__setattr__(self, 'exception_message', str(self.exception))
-        return make_dataclass('FrozenBroadcastReporter', [(field.name, field.type) for field in fields(self)], frozen=True)(*self.serialize())
+    def _freeze(self):
+        # return FrozenBroadcastReporter(record)
+        return make_dataclass('FrozenBroadcastReporter', [('record', LogRecord)], bases=(object,))
