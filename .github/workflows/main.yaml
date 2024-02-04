@@ -30,15 +30,15 @@ jobs:
         run: cd /home/runner/work/tp-ob/tp-ob; pwd; ls -la
 
       - name: Create log file
-        run: touch /.github/workflows/python-app.log
+        run: touch ./python-app.log
 
       - name: python-main
         run: |
-          python main.py 2>&1 | tee /.github/workflows/python-app.log
+          python main.py 2>&1 | tee ./python-app.log
 
       - name: Archive test output as artifact
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: test-results
-          path: /.github/workflows/python-app.log
+          path: ./python-app.log
