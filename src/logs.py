@@ -5,8 +5,6 @@ from queue import Queue
 import datetime
 from dataclasses import dataclass, field
 
-# NOTE/question - is it better to have a class that configures the logging system and a separate class that handles the logging messages? Does this work out alright?
-
 class TpLogger:
     """
     TpLogger is a class that configures and handles the logging mechanism for the application.
