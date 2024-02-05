@@ -8,8 +8,9 @@ from dataclasses import dataclass, field
 
 class TpLogger:
     """
-    TpLogger is a class that configures and handles the logging mechanism, separating logs into different files and
-    providing a mechanism to log into a queue for inter-process communication or similar purposes.
+    TpLogger is a class that configures and handles the logging mechanism for the application.
+    Houses queue-related funcs, logger-related matters are for subclasses with TpLogger serving as a base class and root logger
+    providing a mechanism to 'login' to a queue for inter-process communication or similar purposes.
 
     Attributes:
         log_file_path (str): The path to the log file.
@@ -18,9 +19,14 @@ class TpLogger:
         queue (Queue): A queue object used for logging messages.
         queue_listener (logging.handlers.QueueListener): A queue listener to process logged events.
         logger (logging.Logger): The logger instance with a specific name.
+    
+    Class methods:
+        tp_config: Configures the logging system using a dictionary-based configuration.
+        login: Retrieves a logger with the specified name, attached to the TpLogger instance queue.
+        logout: Stops the queue listener and waits for it to finish processing messages. TODO: more logic to 'finish processing messages'
     """
 
-    def __init__(self, log_file_path: str, branch_name: str, leaf_name: str):
+    def __init__(self, log_file_path: str, branch_name: str, leaf_name: str):  # root is always the base logger(this TpLogger instance and its children and queue etc.)
         """
         Initializes the TpLogger instance.
 
@@ -102,7 +108,7 @@ class TpLogger:
 
         dictConfig(logging_config)
 
-    def get_logger(self, name: str) -> logging.Logger:
+    def login(self, name: str) -> logging.Logger:  # renamed from getlogger to differentiate from the built-in getLogger
         """
         Retrieves a logger with the specified name.
 
@@ -112,12 +118,17 @@ class TpLogger:
         Returns:
             logging.Logger: The logger instance with the specified name.
         """
+        # TODO 'login' functionality to handle queue-related matters (see 'logout' method for queue_listener.stop to end the app)
         return logging.getLogger(name)
+    
 
-    def stop(self):
+
+    def logout(self):
         """
         Stops the queue listener and waits for it to finish processing messages.
         """
+        for item in dir(self.queue_listener):
+            print(f'{item}: {getattr(self.queue_listener, item)}')
         self.queue_listener.stop()
         self.queue_listener.join()
 
@@ -204,3 +215,19 @@ class BroadcastReporter(TpLogger):
             int: The current logging level.
         """
         return self.level
+    
+    def serialize_log(self) -> dict:
+        """
+        Serializes the log data into a dictionary.
+
+        Returns:
+            dict: A dictionary containing the log data.
+        """
+        return {
+            'error_message': self.error_message,
+            'error_code': self.error_code,
+            'exception_type': self.exception_type,
+            'exception_message': self.exception_message,
+            'level': self.level,
+            'timestamp': self.timestamp
+        }

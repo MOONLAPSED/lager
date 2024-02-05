@@ -13,10 +13,10 @@ class TestMain(unittest.TestCase):
 def main():
     l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
     print(f"logger name {l}\n level: {l.level}\n |repr|: {l.__repr__()}\n")
-    ll = l.get_logger('my_branch.my_leaf')
+    ll = l.login('my_branch.my_leaf')
     ll.warning('runtime warning message')
     print(f"logger name: {ll.name}\n level: {ll.level}\n |repr|: {ll.__repr__()}")
-    return 0
+    return 0; l.logout()
 
 if __name__ == '__main__':
     main()
