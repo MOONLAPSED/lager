@@ -118,6 +118,7 @@ class TpLogger:
             logging.Logger: The logger instance with the specified name.
         """
         # TODO 'login' functionality to handle queue-related matters (see 'logout' method for queue_listener.stop to end the app)
+        
         return logging.getLogger(name)
     
 
@@ -222,3 +223,11 @@ class BroadcastReporter(TpLogger):
             'level': self.level,
             'timestamp': self.timestamp
         }
+    def __repr__(self) -> str:
+        for attr in dir(self):
+            if not attr.startswith('__'):
+                print(f'{attr}: {getattr(self, attr)}')
+        return super().__repr__()
+
+    def __str__(self) -> str:
+        return super().__str__()
