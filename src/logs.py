@@ -5,6 +5,7 @@ from queue import Queue
 import datetime
 from dataclasses import dataclass, field
 
+# NOTE/question - is it better to have a class that configures the logging system and a separate class that handles the logging messages? Does this work out alright?
 
 class TpLogger:
     """
@@ -136,17 +137,28 @@ class TpLogger:
 @dataclass
 class BroadcastReporter(TpLogger):
     """
-    BroadcastReporter is a subclass of TpLogger, which adds functionality to report logging messages
-    with associated metadata such as error codes, exception information, and timestamps.
+    The BroadcastReporter class is a specialized subclass of TpLogger designed for enriched logging. It extends the base logging functionality with additional metadata—such as error codes, exception information, and hierarchical context—associated with the log messages.
+
+    By using a BroadcastReporter instance, messages are logged with this augmented information, which is especially useful for error reporting and diagnostic purposes in a production environment. For example:
+
+        br_instance = BroadcastReporter('/path/to/logfile', 'branch', 'leaf', ...)
+        br_instance.log_error()    # Logs an error message with additional context
+
+    The class methods log_error, log_warning, log_info, log_debug, and log_critical are tailored to handle varying levels of logging severity. Each method encapsulates the process of adding detailed metadata and then delegates the actual logging to the underlying logging.Logger instance accessible through self.logger. This design adheres to object-oriented principles and provides a structured approach to logging throughout an application.
 
     Attributes:
         error_message (str): The error message to be logged.
         error_code (int): An error code associated with the message.
-        exception (Exception): The exception object associated with the error.
-        level (int): The logging level for the message (default: logging.ERROR).
-        timestamp (datetime.datetime): The timestamp at which the error was logged.
-        exception_type (str): The type of the exception.
-        exception_message (str): The message associated with the exception.
+        exception (Exception): The exception object associated with an error (if any).
+        level (int): The logging level for the message. Defaults to logging.ERROR.
+        timestamp (datetime.datetime): The timestamp when the log entry is created.
+        exception_type (str): The type of the exception. Automatically derived from the exception attribute.
+        exception_message (str): The message associated with the exception. Also derived from the exception attribute.
+
+    The instantiation of BroadcastReporter initializes TpLogger with a given hierarchy and starts a QueueListener for asynchronous logging if required for multi-threaded or multi-process scenarios. This sets up a robust logging system capable of handling complex logging needs.
+
+    Methods such as serialize_log provide a way to convert log entries to a structured format for serialization or transmission to external systems, which may be essential for logging analysis and monitoring.
+
     """
     error_message: str
     error_code: int
@@ -169,36 +181,10 @@ class BroadcastReporter(TpLogger):
             level (int): The logging level at which the message should be logged.
             message (str): The message to be logged.
         """
-        if level == logging.ERROR:
-            logger.error(message, exc_info=self.exception)
-        elif level == logging.WARNING:
-            logger.warning(message)
-        elif level == logging.CRITICAL:
-            logger.critical(message)
-        elif level == logging.INFO:
-            logger.info(message)
-        elif level == logging.DEBUG:
-            logger.debug(message)
-    """
-    # Method definitions for log_error, log_warning, log_critical, log_info, and log_debug -
-    # Each of these methods call log_message with the corresponding logging level and message.
-    """
-    def log_error(self, logger: logging.Logger):
-        self.log_message(logger, logging.ERROR, self.error_message)
-
-    def log_warning(self, logger: logging.Logger):
-        self.log_message(logger, logging.WARNING, self.error_message)
-
-    def log_critical(self, logger: logging.Logger):
-        self.log_message(logger, logging.CRITICAL, self.error_message)
-
-    def log_info(self, logger: logging.Logger):
-        self.log_message(logger, logging.INFO, self.error_message)
-
-    def log_debug(self, logger: logging.Logger):
-        self.log_message(logger, logging.DEBUG, self.error_message)
-
-    def set_level(self, level: int):
+        extra_info = {'exc_info': self.exception} if level == logging.ERROR else {}
+        logger.log(level, message, **extra_info)
+    
+    def getset_level(self, level: int):
         """
         Sets the reporting level of the BroadcastReporter.
 
@@ -206,16 +192,23 @@ class BroadcastReporter(TpLogger):
             level (int): The logging level to be set.
         """
         object.__setattr__(self, 'level', level)
-
-    def get_level(self) -> int:
-        """
-        Retrieves the current reporting level of the BroadcastReporter.
-
-        Returns:
-            int: The current logging level.
-        """
         return self.level
+
+    def log_error(self):
+        self.logger.error(self.error_message, exc_info=self.exception)
     
+    def log_warning(self):
+        self.logger.warning(self.error_message)
+    
+    def log_critical(self):
+        self.logger.critical(self.error_message)
+    
+    def log_info(self):
+        self.logger.info(self.error_message)
+    
+    def log_debug(self):
+        self.logger.debug(self.error_message)
+
     def serialize_log(self) -> dict:
         """
         Serializes the log data into a dictionary.
