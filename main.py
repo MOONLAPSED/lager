@@ -12,7 +12,13 @@ def main():
     l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
     ll = l.login('my_branch.my_leaf')
     ll.warning('runtime warning message')
-    print(f"logger name: {ll.name}\n level: {ll.level}\n |repr|: {ll.__repr__()}")  # print(object) works as expected?
+    c = lambda: {
+        print(f"logger name: {ll.name}\n|repr|: {ll.__repr__()}")
+        }
+    c()
+    for attr in dir(main):  # no non-public functions should appear in the output
+        if not attr.startswith('__'):
+            print(f'{attr}: {getattr(main, attr)}')
     return 0; l.logout()
 
 def run_main_and_handle_result():
@@ -23,10 +29,6 @@ def run_main_and_handle_result():
     else:
         print("main() did not return 0")
         # ...
-
-    for attr in dir(main):  # no non-public functions should appear in the output
-        if not attr.startswith('__'):
-            print(f'{attr}: {getattr(main, attr)}')
 
 if __name__ == '__main__':
     run_main_and_handle_result()  # TODO: replace with pytest or A/B testing - see: 'TestMain' above for implementation
