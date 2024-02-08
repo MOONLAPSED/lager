@@ -1,6 +1,9 @@
 *.log
 log.txt
 /docs/
+branch*
+leaf*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

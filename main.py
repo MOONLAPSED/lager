@@ -12,13 +12,7 @@ def main():
     l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
     ll = l.login('my_branch.my_leaf')
     ll.warning('runtime warning message')
-    c = lambda: {
-        print(f"logger name: {ll.name}\n|repr|: {ll.__repr__()}")
-        }
-    c()
-    for attr in dir(main):  # no non-public functions should appear in the output
-        if not attr.startswith('__'):
-            print(f'{attr}: {getattr(main, attr)}')
+    print(f"logger name: {ll.name}\n|repr|: {ll.__repr__()}")
     return 0; l.logout()
 
 def run_main_and_handle_result():
