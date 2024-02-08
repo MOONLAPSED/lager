@@ -1,6 +1,8 @@
 from src.logs import TpLogger, BroadcastReporter
 from src.utils import *
 from src.ut import *
+from queue import Queue
+
 class TestMain(unittest.TestCase):
     def test_main(self):
         # Test the main function here
@@ -9,16 +11,11 @@ class TestMain(unittest.TestCase):
 
 
 def main():
-    l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
+    TpLogger.tp_config('/app.log', 'branch', 'leaf', Queue(-1), None)
+    l = BroadcastReporter('/app.log', 'my_branch', 'my_leaf')
     ll = l.login('my_branch.my_leaf')
     ll.warning('runtime warning message')
-    c = lambda: {
-        print(f"logger name: {ll.name}\n|repr|: {ll.__repr__()}")
-        }
-    c()
-    for attr in dir(main):  # no non-public functions should appear in the output
-        if not attr.startswith('__'):
-            print(f'{attr}: {getattr(main, attr)}')
+    ll.info('runtime info message')
     return 0; l.logout()
 
 def run_main_and_handle_result():

@@ -4,6 +4,11 @@ from logging.config import dictConfig
 from queue import Queue
 import datetime
 from dataclasses import dataclass, field
+import logging
+import logging.handlers
+from logging.config import dictConfig
+from queue import Queue
+
 
 class TpLogger:
     """
@@ -24,7 +29,6 @@ class TpLogger:
         login: Retrieves a logger with the specified name, attached to the TpLogger instance queue.
         logout: Stops the queue listener and waits for it to finish processing messages. TODO: more logic to 'finish processing messages'
     """
-
     def __init__(self, log_file_path: str, branch_name: str, leaf_name: str):  # root is always the base logger(this TpLogger instance and its children and queue etc.)
         """
         Initializes the TpLogger instance.
@@ -42,8 +46,10 @@ class TpLogger:
         self.tp_config(log_file_path, branch_name, leaf_name, self.queue)
         self.queue_listener = logging.handlers.QueueListener(self.queue)
         self.queue_listener.start()
-        self.logger = self.get_logger(f'{self.branch_name}.{self.leaf_name}')
-    
+        self.logger = logging.getLogger(f'{branch_name}.{leaf_name}')
+        self.logger.warning('This is a runtime warning')
+        self.logger.info('This is a runtime info message')
+
     def tp_config(self, log_file_path: str, branch_name: str, leaf_name: str, queue: Queue):
         """
         Configures the logging system using a dictionary-based configuration.
@@ -105,32 +111,8 @@ class TpLogger:
             }
         }
 
-        dictConfig(logging_config)
-
-    def login(self, name: str) -> logging.Logger:  # renamed from getlogger to differentiate from the built-in getLogger
-        """
-        Retrieves a logger with the specified name.
-
-        Args:
-            name (str): The name of the logger to retrieve.
-        
-        Returns:
-            logging.Logger: The logger instance with the specified name.
-        """
-        # TODO 'login' functionality to handle queue-related matters (see 'logout' method for queue_listener.stop to end the app)
-        
-        return logging.getLogger(name)
-    
-
-
-    def logout(self):
-        """
-        Stops the queue listener and waits for it to finish processing messages.
-        """
-        for item in dir(self.queue_listener):
-            print(f'{item}: {getattr(self.queue_listener, item)}')
-        self.queue_listener.stop()
-        self.queue_listener.join()
+        # Add the 'file' handler to log messages to the file
+        logging_config['handlers']['file']['filename'] = log_file_path
 
 
 @dataclass
@@ -159,17 +141,12 @@ class BroadcastReporter(TpLogger):
     Methods such as serialize_log provide a way to convert log entries to a structured format for serialization or transmission to external systems, which may be essential for logging analysis and monitoring.
 
     """
-    error_message: str
-    error_code: int
-    exception: Exception
-    level: int = logging.ERROR
-    timestamp: datetime.datetime = field(default_factory=datetime.datetime.now)
-    exception_type: str = field(init=False)
-    exception_message: str = field(init=False)
 
-    def __post_init__(self):
-        object.__setattr__(self, 'exception_type', type(self.exception).__name__)
-        object.__setattr__(self, 'exception_message', str(self.exception))
+    error_code: int
+
+    level: int = logging.ERROR
+
+    timestamp: datetime.datetime = field(default_factory=datetime.datetime.now)
 
     def log_message(self, logger: logging.Logger, level: int, message: str):
         """
@@ -195,18 +172,6 @@ class BroadcastReporter(TpLogger):
 
     def log_error(self):
         self.logger.error(self.error_message, exc_info=self.exception)
-    
-    def log_warning(self):
-        self.logger.warning(self.error_message)
-    
-    def log_critical(self):
-        self.logger.critical(self.error_message)
-    
-    def log_info(self):
-        self.logger.info(self.error_message)
-    
-    def log_debug(self):
-        self.logger.debug(self.error_message)
 
     def serialize_log(self) -> dict:
         """
@@ -231,3 +196,28 @@ class BroadcastReporter(TpLogger):
 
     def __str__(self) -> str:
         return super().__str__()
+
+    def login(self, name: str) -> logging.Logger:  # renamed from getlogger to differentiate from the built-in getLogger
+        """
+        Retrieves a logger with the specified name.
+
+        Args:
+            name (str): The name of the logger to retrieve.
+        
+        Returns:
+            logging.Logger: The logger instance with the specified name.
+        """
+        # TODO 'login' functionality to handle queue-related matters (see 'logout' method for queue_listener.stop to end the app)
+        
+        return logging.getLogger(name)
+    
+
+
+    def logout(self):
+        """
+        Stops the queue listener and waits for it to finish processing messages.
+        """
+        for item in dir(self.queue_listener):
+            print(f'{item}: {getattr(self.queue_listener, item)}')
+        self.queue_listener.stop()
+        self.queue_listener.join()
