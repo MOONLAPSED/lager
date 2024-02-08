@@ -50,42 +50,36 @@ class TpLogger:
         self.logger.warning('This is a runtime warning')
         self.logger.info('This is a runtime info message')
 
-    def tp_config(self, log_file_path: str, branch_name: str, leaf_name: str, queue: Queue):
-        """
-        Configures the logging system using a dictionary-based configuration.
-
-        Args:
-            log_file_path (str): The path to the log file.
-            branch_name (str): The base name for the logger hierarchy.
-            leaf_name (str): The leaf name for the logger hierarchy.
-            queue (Queue): A queue for handling logging messages.
-        """
-        logging_config = {
+    @staticmethod  # static method called on class via TpLogger.tp_config()
+    def tp_config(log_file_path: str, branch_name: str, leaf_name: str, queue: Queue):
+        """Static method to configure logging"""
+        
+        config = {
             'version': 1,
             'disable_existing_loggers': False,
             'formatters': {
                 'default': {
                     'format': '[%(levelname)s]-%(asctime)s|-%(name)s: %(message)s',
                     'datefmt': '%Y-%m-%d~%H:%M:%S%z'
-                },
+                }
             },
             'handlers': {
                 'console': {
                     'level': 'INFO',
                     'class': 'logging.StreamHandler',
-                    'formatter': 'default',
+                    'formatter': 'default'
                 },
                 'file': {
                     'level': 'INFO',
-                    'formatter': 'default',
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': log_file_path,
                     'maxBytes': 10485760,
-                    'backupCount': 10
+                    'backupCount': 10,
+                    'formatter': 'default'
                 },
                 'queue': {
                     'class': 'logging.handlers.QueueHandler',
-                    'queue': queue,
+                    'queue': queue
                 }
             },
             'loggers': {
@@ -111,8 +105,8 @@ class TpLogger:
             }
         }
 
-        # Add the 'file' handler to log messages to the file
-        logging_config['handlers']['file']['filename'] = log_file_path
+        dictConfig(config)
+
 
 
 @dataclass
@@ -188,12 +182,13 @@ class BroadcastReporter(TpLogger):
             'level': self.level,
             'timestamp': self.timestamp
         }
+    """
     def __repr__(self) -> str:
         for attr in dir(self):
             if not attr.startswith('__'):
                 print(f'{attr}: {getattr(self, attr)}')
         return super().__repr__()
-
+    """
     def __str__(self) -> str:
         return super().__str__()
 

@@ -10,13 +10,15 @@ class TestMain(unittest.TestCase):
         self.assertEqual(main(), 0)
 
 
-def main():
-    TpLogger.tp_config('/app.log', 'branch', 'leaf', Queue(-1), None)
-    l = BroadcastReporter('/app.log', 'my_branch', 'my_leaf')
+def main(): 
+    TpLogger.tp_config('app.log', 'branch', 'leaf', Queue(-1))  # Call static method
+    l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
+    print(l)
     ll = l.login('my_branch.my_leaf')
     ll.warning('runtime warning message')
     ll.info('runtime info message')
-    return 0; l.logout()
+    print(ll)
+    return 0; ll.logout()
 
 def run_main_and_handle_result():
     result = main()
