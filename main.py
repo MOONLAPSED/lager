@@ -1,6 +1,8 @@
 from src.logs import TpLogger, BroadcastReporter
 from src.utils import *
 from src.ut import *
+from queue import Queue
+
 class TestMain(unittest.TestCase):
     def test_main(self):
         # Test the main function here
@@ -8,8 +10,10 @@ class TestMain(unittest.TestCase):
         self.assertEqual(main(), 0)
 
 
-def main():
+def main(): 
+    TpLogger.tp_config('app.log', 'branch', 'leaf', Queue(-1))  # Call static method
     l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
+    print(l)
     ll = l.login('my_branch.my_leaf')
     ll.warning('runtime warning message')
     print(f"logger name: {ll.name}\n|repr|: {ll.__repr__()}")
