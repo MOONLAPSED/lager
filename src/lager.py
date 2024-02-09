@@ -9,7 +9,7 @@ import sys
 from queue import Queue
 from abc import ABC, abstractmethod
 
-@dataclass
+@dataclass(init=True)
 class TpLogger():
 
     LOGGING_CONFIG = {
@@ -63,7 +63,6 @@ class TpLogger():
         dictConfig(self.LOGGING_CONFIG)
         # self.logger.root.setLevel(logging.WARNING)  # comment this out to show [INFO] and [DEBUG] logs via console handler
         # self.logger.info(f"Logger {self.__class__.__name__} initialized")  # un-comment for printf-debugging
-
     def __init__(self, **kwargs):
         self.__static__init__(self)
         try:
@@ -79,7 +78,8 @@ class TpLogger():
         self.logger.info(f"Runtime achieved, root handlers [file, console] initialized\n")
         try:
             if self.leaf is not None or 'leaf' in kwargs:
-                self.leaf = kwargs.get('leaf')
+                self.leaf = kwargs.get('leaf', self.leaf)
+
                 self.logger.info(f"Successfully assigned 'leaf' value: {self.leaf}")
             else:
                 self.logger.info("'leaf' value is not provided in kwargs and remains None.")

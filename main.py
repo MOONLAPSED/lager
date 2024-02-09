@@ -12,17 +12,13 @@ def main():
     ll = TpLogger()
     ll.logger.warning(f"Runtime warning per instance of {ll.__class__.__name__} class\n\n|repr|: {ll.__repr__()}\n")
     try:
-        l = ll.__class__(branch='root', leaf='runtime_leaf')
+        ll = ll.__class__(branch='root', leaf='runtime_leaf')  # Assign new instance to ll
         ll.login('runtime_leaf')
-        # insert test for root.branch.leaf runtime sub-logger
-        l.logger.info(f"Testing sub-logger for root.branch.leaf: {ll.__class__.__name__} class\n\n|repr|: {ll.__repr__()}\n")
-        # insert test for root.branch.leaf runtime sub-logger
-        ll.logout()
     except Exception as e:
         ll.logger.error(f"An error occurred while logging in and out: {str(e)}")
     finally:
         ll.logger.info(f"Runtime concluded, all logging handlers removed\n")
-    return 0; l.logout()
+    return 0; ll.logout()
 
 
 def run_main_and_handle_result():
