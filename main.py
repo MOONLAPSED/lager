@@ -11,8 +11,7 @@ class TestMain(unittest.TestCase):
 def main():
     l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
     ll = l.login('my_branch.my_leaf')
-    ll.warning('runtime warning message')
-    print(f"logger name: {ll.name}\n|repr|: {ll.__repr__()}")
+    ll.warning(f"Runtime warning per instance of {ll.__class__.__name__} class\nRuntime warning per instance of {l.__class__.__name__} class\n|repr|: {l.__repr__()}\n|repr|: {ll.__repr__()}")
     return 0; l.logout()
 
 def run_main_and_handle_result():

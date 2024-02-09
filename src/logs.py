@@ -7,8 +7,22 @@ from dataclasses import dataclass, field
 import logging
 import logging.handlers
 from logging.config import dictConfig
+import os
+import sys
 from queue import Queue
 
+def main():
+    try:
+        sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # is there adequate permission to expand the path?
+    except Exception as e:
+        print(e)
+    finally:
+        sys.path.extend([
+            os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')),
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), '.'),
+            os.path.abspath(os.path.dirname(__file__))
+        ])
+        return TpLogger(), BroadcastReporter('app.log', 'my_branch', 'my_leaf')
 
 class TpLogger:
     """
@@ -133,13 +147,9 @@ class BroadcastReporter(TpLogger):
     The instantiation of BroadcastReporter initializes TpLogger with a given hierarchy and starts a QueueListener for asynchronous logging if required for multi-threaded or multi-process scenarios. This sets up a robust logging system capable of handling complex logging needs.
 
     Methods such as serialize_log provide a way to convert log entries to a structured format for serialization or transmission to external systems, which may be essential for logging analysis and monitoring.
-
     """
-
     error_code: int
-
     level: int = logging.ERROR
-
     timestamp: datetime.datetime = field(default_factory=datetime.datetime.now)
 
     def log_message(self, logger: logging.Logger, level: int, message: str):
@@ -182,13 +192,6 @@ class BroadcastReporter(TpLogger):
             'level': self.level,
             'timestamp': self.timestamp
         }
-    """
-    def __repr__(self) -> str:
-        for attr in dir(self):
-            if not attr.startswith('__'):
-                print(f'{attr}: {getattr(self, attr)}')
-        return super().__repr__()
-    """
     def __str__(self) -> str:
         return super().__str__()
 
@@ -203,10 +206,15 @@ class BroadcastReporter(TpLogger):
             logging.Logger: The logger instance with the specified name.
         """
         # TODO 'login' functionality to handle queue-related matters (see 'logout' method for queue_listener.stop to end the app)
+        """
+        def __repr__(self) -> str:
+            for attr in dir(self):
+                if not attr.startswith('__'):
+                    print(f'{attr}: {getattr(self, attr)}')
+            return super().__repr__()
+        """
         
         return logging.getLogger(name)
-    
-
 
     def logout(self):
         """
@@ -216,3 +224,9 @@ class BroadcastReporter(TpLogger):
             print(f'{item}: {getattr(self.queue_listener, item)}')
         self.queue_listener.stop()
         self.queue_listener.join()
+
+
+
+
+if __name__ == '__main__':
+    main()
