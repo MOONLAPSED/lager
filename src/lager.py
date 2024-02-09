@@ -9,6 +9,7 @@ import sys
 from queue import Queue
 from abc import ABC, abstractmethod
 
+@dataclass
 class TpLogger():
 
     LOGGING_CONFIG = {
@@ -60,8 +61,8 @@ class TpLogger():
     def __static__init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
         dictConfig(self.LOGGING_CONFIG)
-        # self.logger.root.setLevel(logging.WARNING)  # comment this out to show [INFO] and [DEBUG] logs
-        self.logger.info(f"Logger {self.__class__.__name__} initialized")
+        # self.logger.root.setLevel(logging.WARNING)  # comment this out to show [INFO] and [DEBUG] logs via console handler
+        # self.logger.info(f"Logger {self.__class__.__name__} initialized")  # un-comment for printf-debugging
 
     def __init__(self, **kwargs):
         self.__static__init__(self)
@@ -75,7 +76,7 @@ class TpLogger():
         finally:
             self.leaf = None
     def __post_init__(self, **kwargs):
-        self.logger.info(f"Runtime achieved, all logging handlers initialized")
+        self.logger.info(f"Runtime achieved, root handlers [file, console] initialized\n")
         try:
             if self.leaf is not None or 'leaf' in kwargs:
                 self.leaf = kwargs.get('leaf')
@@ -86,6 +87,7 @@ class TpLogger():
             self.logger.error(f"An error occurred while assigning 'leaf' value: {str(e)}")
         finally:
             self.logger.info(f"Branch: {self.branch}\nLeaf: {self.leaf} fully runtime initialized")
+        return self
     def login(self, leaf):
         self.leaf = leaf
         self.logger.info(f"Successfully logged in with leaf: {self.leaf}")
