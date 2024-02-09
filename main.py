@@ -1,6 +1,6 @@
-from src.logs import TpLogger, BroadcastReporter
-from src.utils import *
-from src.ut import *
+from src.lager import TpLogger
+import unittest
+
 class TestMain(unittest.TestCase):
     def test_main(self):
         # Test the main function here
@@ -9,10 +9,21 @@ class TestMain(unittest.TestCase):
 
 
 def main():
-    l = BroadcastReporter('app.log', 'my_branch', 'my_leaf')
-    ll = l.login('my_branch.my_leaf')
-    ll.warning(f"Runtime warning per instance of {ll.__class__.__name__} class\nRuntime warning per instance of {l.__class__.__name__} class\n|repr|: {l.__repr__()}\n|repr|: {ll.__repr__()}")
+    ll = TpLogger()
+    ll.logger.warning(f"Runtime warning per instance of {ll.__class__.__name__} class\n\n|repr|: {ll.__repr__()}\n")
+    try:
+        l = ll.__class__(branch='root', leaf='runtime_leaf')
+        ll.login('runtime_leaf')
+        # insert test for root.branch.leaf runtime sub-logger
+        l.logger.info(f"Testing sub-logger for root.branch.leaf: {ll.__class__.__name__} class\n\n|repr|: {ll.__repr__()}\n")
+        # insert test for root.branch.leaf runtime sub-logger
+        ll.logout()
+    except Exception as e:
+        ll.logger.error(f"An error occurred while logging in and out: {str(e)}")
+    finally:
+        ll.logger.info(f"Runtime concluded, all logging handlers removed\n")
     return 0; l.logout()
+
 
 def run_main_and_handle_result():
     result = main()
@@ -27,3 +38,5 @@ if __name__ == '__main__':
     run_main_and_handle_result()  # TODO: replace with pytest or A/B testing - see: 'TestMain' above for implementation
     # TestMain.test_main()
     # unittest.main()
+
+
