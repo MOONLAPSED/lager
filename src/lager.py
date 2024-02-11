@@ -10,7 +10,7 @@ from logging.config import dictConfig
 from abc import ABC, abstractmethod
 
 
-@dataclass
+@dataclass(init=True)
 class LogConfig:
     LOGGING_CONFIG = {
         'version': 1,
