@@ -27,13 +27,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Navigate to directory with main.py and print current directory
-        run: cd /home/runner/work/lager/lager; pwd; ls -la
+        run: |
+          cd /home/runner/work/lager/lager
+          pwd
+          ls -la
 
       - name: Create log file
         run: touch ./python-app.log
 
       - name: python-main
         run: |
+          cd /home/runner/work/lager/lager
           python main.py 2>&1 | tee ./python-app.log
 
       - name: Archive test output as artifact
