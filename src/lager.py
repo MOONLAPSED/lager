@@ -1,23 +1,23 @@
-from dataclasses import dataclass, field
 import datetime
-import xml.etree.ElementTree as ET
 import logging
-from logging.handlers import RotatingFileHandler 
-from logging.config import dictConfig
+import multiprocessing
 import os
 import sys
-from queue import Queue
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass, field
+from logging.handlers import RotatingFileHandler 
+from logging.config import dictConfig
 from abc import ABC, abstractmethod
 
-@dataclass(init=True)
-class TpLogger():
 
+@dataclass
+class LogConfig:
     LOGGING_CONFIG = {
         'version': 1,
-        'disable_existing_loggers': False,   
+        'disable_existing_loggers': False,
         'formatters': {
             'default': {
-                'format': '[%(levelname)s]%(asctime)s||%(name)s: %(message)s',
+                'format': '[%(levelname)s]%(asctime)s|[%(name)s]: %(message)s',
                 'datefmt': '%Y-%m-%d~%H:%M:%S%z'
             },
         },
@@ -48,64 +48,45 @@ class TpLogger():
                 'level': logging.INFO,
                 'formatter': 'default',
                 'class': 'logging.handlers.QueueHandler',
-                'queue': Queue(-1)
+                'queue': multiprocessing.Queue(-1)
             }
         },
-        'root': {  
+        'root': {
             'level': logging.INFO,
             'propagate': True,
             'handlers': ['console', 'file']
         }
     }
-    @staticmethod
-    def __static__init__(self):
-        self.logger = logging.getLogger(self.__class__.__name__)
-        dictConfig(self.LOGGING_CONFIG)
-        # self.logger.root.setLevel(logging.WARNING)  # comment this out to show [INFO] and [DEBUG] logs via console handler
-        # self.logger.info(f"Logger {self.__class__.__name__} initialized")  # un-comment for printf-debugging
-    def __init__(self, **kwargs):
-        self.__static__init__(self)
-        try:
-            self.branch = kwargs['branch']
-            self.logger.info(f"Successfully assigned 'branch' value: {self.branch}")
-        except KeyError:
-            self.logger.error("Failed to assign 'branch' value. Key not found in kwargs.")
-        except Exception as e:
-            self.logger.error(f"An error occurred while assigning 'branch' value: {str(e)}")
-        finally:
-            self.leaf = None
-    def __post_init__(self, **kwargs):
-        self.logger.info(f"Runtime achieved, root handlers [file, console] initialized\n")
-        try:
-            if self.leaf is not None or 'leaf' in kwargs:
-                self.leaf = kwargs.get('leaf', self.leaf)
 
-                self.logger.info(f"Successfully assigned 'leaf' value: {self.leaf}")
-            else:
-                self.logger.info("'leaf' value is not provided in kwargs and remains None.")
-        except Exception as e:
-            self.logger.error(f"An error occurred while assigning 'leaf' value: {str(e)}")
-        finally:
-            self.logger.info(f"Branch: {self.branch}\nLeaf: {self.leaf} fully runtime initialized")
+    logger: logging.Logger = field(init=False)
+
+    def __static_init__(self) -> 'LogConfig':
+        """
+        Performs run-once initialization of logging configuration and queue handler.
+        """
+        logging.config.dictConfig(self.LOGGING_CONFIG)
+        self.logger = logging.getLogger(__name__)
         return self
-    def login(self, leaf):
-        self.leaf = leaf
-        self.logger.info(f"Successfully logged in with leaf: {self.leaf}")
-        """
-        self.logger.addHandler(logging.getLogger('broadcast'))
-        self.logger.addHandler(logging.getLogger('queue'))
-        self.logger.addHandler(logging.getLogger('file'))
-        self.logger.addHandler(logging.getLogger('console'))
-        """
-        return self
-    def logout(self):
-        self.leaf = None
-        # self.logger.info(f"Successfully logged out")  # comment this out for per-handler logout messages
-        """
-        self.logger.removeHandler(logging.getLogger('broadcast'))
-        self.logger.removeHandler(logging.getLogger('queue'))
-        self.logger.removeHandler(logging.getLogger('file'))
-        self.logger.removeHandler(logging.getLogger('console'))
-        """
-        return self
+
+    def __init__(self):
+        self.__static_init__()
+
+    def __post_init__(self):
+        self.logger.info(f"Runtime achieved, root handlers [file, console] initialized\n")
+        # ...
+
+if __name__ == "__main__":
+    config_instance = LogConfig()
+    logger_instance = config_instance.logger
+
+    logger_instance.debug('This is a debug message')
+    logger_instance.info('This is an info message')
+    logger_instance.warning('This is a warning message')
+    logger_instance.error('This is an error message')
+    logger_instance.critical('This is a critical message')
+
+
+
+
+
 

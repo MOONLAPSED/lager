@@ -1,24 +1,26 @@
-from src.lager import TpLogger
+from src.lager import LogConfig
 import unittest
 
 class TestMain(unittest.TestCase):
     def test_main(self):
         # Test the main function here
         # self.assertEqual(main(), 0)  # Check if main returns 0
+        # ...
         self.assertEqual(main(), 0)
 
 
 def main():
-    ll = TpLogger()
-    ll.logger.warning(f"Runtime warning per instance of {ll.__class__.__name__} class\n\n|repr|: {ll.__repr__()}\n")
+    lc = LogConfig()
+
     try:
-        ll = ll.__class__(branch='root', leaf='runtime_leaf')  # Assign new instance to ll
-        ll.login('runtime_leaf')
+        ll = lc.logger
+        ll.info('runtime 0 / 0 = 0')
+        # ...
     except Exception as e:
-        ll.logger.error(f"An error occurred while logging in and out: {str(e)}")
+        print(f"An error occurred while logging in and out: {str(e)}")
     finally:
-        ll.logger.info(f"Runtime concluded, all logging handlers removed\n")
-    return 0; ll.logout()
+        ll.info('0 = 0 or 0 == 0; Returning 0.')
+    return 0
 
 
 def run_main_and_handle_result():
@@ -31,8 +33,10 @@ def run_main_and_handle_result():
         # ...
 
 if __name__ == '__main__':
-    run_main_and_handle_result()  # TODO: replace with pytest or A/B testing - see: 'TestMain' above for implementation
+    run_main_and_handle_result()
+    # TODO: replace with pytest or A/B testing - see: 'TestMain' above for implementation
     # TestMain.test_main()
     # unittest.main()
+    # ...
 
 
