@@ -37,8 +37,10 @@ jobs:
 
       - name: python-main
         run: |
-          cd /home/runner/work/lager/lager
+          cd /home/runner/work/lager/lager  # Change to the correct directory
           python main.py 2>&1 | tee ./python-app.log
+          echo "Contents of python-app.log:"
+          cat ./python-app.log
 
       - name: Archive test output as artifact
         if: always()
