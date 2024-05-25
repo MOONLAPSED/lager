@@ -1,19 +1,16 @@
-# /main.py
-# this repo, `lager`, is part of "cognosis - cognitive coherence coroutines" project, which amongst other things, is a pythonic implementation of a model cognitive system:
+# main.py
 # This script is part of "cognosis - cognitive coherence coroutines" project,
-# which is a pythonic implementation of a model cognitive system, 
-# utilizing concepts from signal processing, cognitive theories, 
+# which is a pythonic implementation of a model cognitive system,
+# utilizing concepts from signal processing, cognitive theories,
 # and machine learning to create adaptive systems.
 
+import argparse
+import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Any, TypeVar, Generic, Union
-import struct
-import sys
-import argparse
 import pickle
-import types
-import threading
+import time
 
 T = TypeVar('T')
 
@@ -21,11 +18,12 @@ T = TypeVar('T')
 BANNED_WORDS = ["TOKEN", "PARSER", "COMPILER", "POINTER", "FACTOR", "LEXER", "SHELL", "TERMINAL", "AI", "MODEL", "ATTRIBUTE", "DICTIONARY", "DICT"]
 
 # Argument parser setup
-args = argparse.ArgumentParser(description="Hypothesis? Use a simple, terse English statement.")
-if any(word in ' '.join(args.description.split()) for word in BANNED_WORDS):
+parser = argparse.ArgumentParser(description="Hypothesis? Use a simple, terse English statement.")
+if any(word in parser.description.split() for word in BANNED_WORDS):
     for word in BANNED_WORDS:
         print(f"You cannot use the word {word} in your arguments.")
     sys.exit(1)
+
 
 # Abstract base class
 class Atom(ABC):
@@ -52,6 +50,7 @@ class Atom(ABC):
     @abstractmethod
     def tautology(self, expression: Callable[..., bool]) -> bool:
         pass
+
 
 # Example global functions to replace lambdas
 def reflexivity(x):
@@ -99,6 +98,7 @@ def nand(a, b):
 def contrapositive(a, b):
     return (not b) or (not a)
 
+
 @dataclass
 class FormalTheory(Atom, Generic[T]):
     reflexivity: Callable[[T], bool] = reflexivity
@@ -123,25 +123,13 @@ class FormalTheory(Atom, Generic[T]):
         })
 
     def encode(self) -> bytes:
-        # Encode FormalTheory attributes into bytes using pickle
-        state = {
-            'reflexivity': self.reflexivity,
-            'symmetry': self.symmetry,
-            'transitivity': self.transitivity,
-            'transparency': self.transparency,
-            'case_base': self.case_base
-        }
-        return pickle.dumps(state)
+        # Serialize the class instance using pickle
+        return pickle.dumps(self.__dict__)
 
     def decode(self, data: bytes) -> None:
-        # Decode bytes into FormalTheory attributes using pickle
-        state = pickle.loads(data)
-        self.reflexivity = state['reflexivity']
-        self.symmetry = state['symmetry']
-        self.transitivity = state['transitivity']
-        self.transparency = state['transparency']
-        self.case_base = state['case_base']
-        
+        # Deserialize the class instance using pickle
+        self.__dict__.update(pickle.loads(data))
+
     def execute(self, *args, **kwargs) -> Any:
         return self.transparency(*args, **kwargs)
 
@@ -153,6 +141,7 @@ class FormalTheory(Atom, Generic[T]):
 
     def tautology(self, expression: Callable[..., bool]) -> bool:
         return expression()
+
 
 @dataclass
 class AtomicData(Atom):
@@ -167,7 +156,7 @@ class AtomicData(Atom):
     def execute(self, *args, **kwargs) -> Any:
         return self.data
 
-    def __repr(self) -> str:
+    def __repr__(self) -> str:
         return f"AtomicData(data={self.data})"
 
     def parse_expression(self, expression: str) -> Union['AtomicData', 'FormalTheory']:
@@ -175,6 +164,7 @@ class AtomicData(Atom):
 
     def tautology(self, expression: Callable[..., bool]) -> bool:
         return expression()
+
 
 class ThreadSafeContextManager:
     def __init__(self):
@@ -185,6 +175,7 @@ class ThreadSafeContextManager:
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.lock.release()
+
 
 class ScopeLifetimeGarden:
     def __init__(self):
@@ -197,6 +188,27 @@ class ScopeLifetimeGarden:
 
     def set(self, value: AtomicData):
         self.local_data.scratch = value
+
+
+def benchmark():
+    # AtomicData benchmark using pickle
+    print("Benchmarking AtomicData using pickle...")
+    data = AtomicData(data={"key": "value"})
+    start_time = time.time()
+    for _ in range(10000):
+        encoded = data.encode()
+        data.decode(encoded)
+    print(f"AtomicData: {time.time() - start_time} seconds.")
+
+    # FormalTheory benchmark using pickle
+    print("Benchmarking FormalTheory using pickle...")
+    theory = FormalTheory()
+    start_time = time.time()
+    for _ in range(10000):
+        encoded = theory.encode()
+        theory.decode(encoded)
+    print(f"FormalTheory: {time.time() - start_time} seconds.")
+
 
 def main():
     # Demonstration of FormalTheory
@@ -228,11 +240,15 @@ def main():
         # Any thread-safe operations here
         pass
 
-    # Using ScopeLifetimeGarden 
+    # Using ScopeLifetimeGarden
     print("Using ScopeLifetimeGarden")
     garden = ScopeLifetimeGarden()
     garden.set(AtomicData(data="Initial Data"))
     print("Garden Data:", garden.get())
+
+    # Run benchmark
+    benchmark()
+
 
 if __name__ == "__main__":
     main()

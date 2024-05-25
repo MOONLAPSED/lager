@@ -1,17 +1,15 @@
 # /main.py
-# this repo, `lager`, is part of "cognosis - cognitive coherence coroutines" project, which amongst other things, is a pythonic implementation of a model cognitive system:
 # This script is part of "cognosis - cognitive coherence coroutines" project,
 # which is a pythonic implementation of a model cognitive system, 
 # utilizing concepts from signal processing, cognitive theories, 
 # and machine learning to create adaptive systems.
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Callable, Dict, Any, TypeVar, Generic, Union
-import struct
+import json
 import sys
 import argparse
-import pickle
 import types
 import threading
 
@@ -30,11 +28,11 @@ if any(word in ' '.join(args.description.split()) for word in BANNED_WORDS):
 # Abstract base class
 class Atom(ABC):
     @abstractmethod
-    def encode(self) -> bytes:
+    def encode(self) -> str:
         pass
 
     @abstractmethod
-    def decode(self, data: bytes) -> None:
+    def decode(self, data: str) -> None:
         pass
 
     @abstractmethod
@@ -122,26 +120,26 @@ class FormalTheory(Atom, Generic[T]):
             'contrapositive': contrapositive
         })
 
-    def encode(self) -> bytes:
-        # Encode FormalTheory attributes into bytes using pickle
+    def encode(self) -> str:
+        # Encode FormalTheory attributes into a JSON string
         state = {
-            'reflexivity': self.reflexivity,
-            'symmetry': self.symmetry,
-            'transitivity': self.transitivity,
-            'transparency': self.transparency,
-            'case_base': self.case_base
+            'reflexivity': 'reflexivity',
+            'symmetry': 'symmetry',
+            'transitivity': 'transitivity',
+            'transparency': 'transparency',
+            'case_base': {k: v.__name__ for k, v in self.case_base.items()}
         }
-        return pickle.dumps(state)
+        return json.dumps(state)
 
-    def decode(self, data: bytes) -> None:
-        # Decode bytes into FormalTheory attributes using pickle
-        state = pickle.loads(data)
-        self.reflexivity = state['reflexivity']
-        self.symmetry = state['symmetry']
-        self.transitivity = state['transitivity']
-        self.transparency = state['transparency']
-        self.case_base = state['case_base']
-        
+    def decode(self, data: str) -> None:
+        # Decode JSON string into FormalTheory attributes
+        state = json.loads(data)
+        self.reflexivity = globals()[state['reflexivity']]
+        self.symmetry = globals()[state['symmetry']]
+        self.transitivity = globals()[state['transitivity']]
+        self.transparency = globals()[state['transparency']]
+        self.case_base = {k: globals()[v] for k, v in state['case_base'].items()}
+
     def execute(self, *args, **kwargs) -> Any:
         return self.transparency(*args, **kwargs)
 
@@ -158,11 +156,11 @@ class FormalTheory(Atom, Generic[T]):
 class AtomicData(Atom):
     data: Any
 
-    def encode(self) -> bytes:
-        return pickle.dumps(self.data)
+    def encode(self) -> str:
+        return json.dumps(self.data)
 
-    def decode(self, data: bytes) -> None:
-        self.data = pickle.loads(data)
+    def decode(self, data: str) -> None:
+        self.data = json.loads(data)
 
     def execute(self, *args, **kwargs) -> Any:
         return self.data
@@ -236,3 +234,51 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+"""pickle.py
+import pickle
+
+@dataclass
+class FormalTheory(Atom, Generic[T]):
+    reflexivity: Callable[[T], bool] = reflexivity
+    symmetry: Callable[[T, T], bool] = symmetry
+    transitivity: Callable[[T, T, T], bool] = transitivity
+    transparency: Callable[[Callable[..., T], T, T], T] = transparency
+    case_base: Dict[str, Callable[..., bool]] = field(default_factory=dict)
+
+    def __post_init__(self):
+        self.case_base.update({
+            '⊤': top,
+            '⊥': bottom,
+            'a': if_else_a,
+            '¬': negation,
+            '∧': conjunction,
+            '∨': disjunction,
+            '→': implication,
+            '↔': biconditional,
+            '¬∨': nor,  # NOR operation
+            '¬∧': nand,  # NAND operation
+            'contrapositive': contrapositive
+        })
+
+    def encode(self) -> bytes:
+        # Serialize the class instance using pickle
+        return pickle.dumps(self.__dict__)
+
+    def decode(self, data: bytes) -> None:
+        # Deserialize the class instance using pickle
+        self.__dict__.update(pickle.loads(data))
+
+    def execute(self, *args, **kwargs) -> Any:
+        return self.transparency(*args, **kwargs)
+
+    def __repr__(self) -> str:
+        return f"FormalTheory(reflexivity={self.reflexivity}, symmetry={self.symmetry}, transitivity={self.transitivity}, transparency={self.transparency})"
+
+    def parse_expression(self, expression: str) -> Union['AtomicData', 'FormalTheory']:
+        return self.case_base.get(expression, None)
+
+    def tautology(self, expression: Callable[..., bool]) -> bool:
+        return expression()
+"""
