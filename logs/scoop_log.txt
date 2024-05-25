@@ -1,0 +1,27 @@
+2024-05-22 15:10:35 - Starting Scoop script execution.
+2024-05-22 15:10:35 - Added Scoop to PATH.
+2024-05-22 15:10:35 - Scoop is already installed.
+2024-05-22 15:10:54 - Installed package: git
+2024-05-22 15:10:54 - Adding extra buckets.
+2024-05-22 15:10:58 - Added bucket: nerd-fonts
+2024-05-22 15:11:20 - Added bucket: extras
+2024-05-22 15:11:27 - Added bucket: versions
+2024-05-22 15:11:28 - Installed package: main/gh
+2024-05-22 15:11:55 - Installed package: versions/vscode-insiders
+2024-05-22 15:11:57 - Installed package: versions/windows-terminal-preview
+2024-05-22 15:11:58 - Installed package: main/lsd
+2024-05-22 15:12:20 - Installed package: extras/mambaforge
+2024-05-22 15:12:20 - Launching common applications.
+2024-05-22 15:12:21 - Failed to launch Windows Terminal. Launching PowerShell instead.
+2024-05-22 15:12:21 - Updating Scoop.
+2024-05-22 15:12:47 - Installed package: extras/x64dbg
+2024-05-22 15:12:50 - Installed package: main/curl
+2024-05-22 15:13:03 - Installed package: versions/openssl-light
+2024-05-22 15:13:16 - Installed package: extras/okular
+2024-05-22 15:13:20 - Installed package: extras/irfanview-lean
+2024-05-22 15:13:23 - Installed package: extras/mpc-hc-fork
+2024-05-22 15:13:25 - Installed package: extras/carapace-bin
+2024-05-22 15:13:25 - Installed package: main/zoxide
+2024-05-22 15:13:28 - Installed package: nerd-fonts/FiraMono-NF-Mono
+2024-05-22 15:13:31 - Installed package: nerd-fonts/FiraCode-NF
+2024-05-22 15:13:31 - Scoop script execution completed.

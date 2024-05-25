@@ -1,9 +1,0 @@
-numpy
-pandas
-matplotlib
-ipykernel
-jupyterlab
-litellm
-xonsh
-jax
-pytest

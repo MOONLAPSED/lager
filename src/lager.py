@@ -78,15 +78,10 @@ class LogConfig:
 if __name__ == "__main__":
     config_instance = LogConfig()
     logger_instance = config_instance.logger
-
+    """
     logger_instance.debug('This is a debug message')
     logger_instance.info('This is an info message')
     logger_instance.warning('This is a warning message')
     logger_instance.error('This is an error message')
     logger_instance.critical('This is a critical message')
-
-
-
-
-
-
+    """
